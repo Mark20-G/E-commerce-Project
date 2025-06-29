@@ -1,0 +1,139 @@
+/*
+========================================================
+stored procedure- load bronze layer
+========================================================
+script purpose: loading data into the 'bronze' schema from external csv files,
+according to the following steps:
+-truncate the tables before loading
+-using 'BULK insert' command to load data from csv files into the table
+========================================================
+*/
+create or alter procedure bronze.load_bronze as
+begin
+	declare @start_time datetime, @end_time datetime, @batch_start_time datetime, @batch_end_time datetime;
+ begin try
+	print '====================================================================';
+	print 'loading bronze layer';
+	print '====================================================================';
+
+	set @batch_start_time=GETDATE();
+	set @start_time=GETDATE();
+	print '>>truncating table Amazon_Sale_Report';
+	truncate table bronze.Amazon_Sale_Report;
+	print '>>inserting data into table cust_info';
+	bulk insert bronze.Amazon_Sale_Report
+	from 'C:\Users\DELL\Desktop\לימודים\Project- E-Commerce\CSV files\Amazon Sale Report.csv'
+	with(
+	firstrow=2,
+	fieldterminator=',',
+	tablock
+	);
+	set @end_time=GETDATE();
+	print 'loading duration: '+ cast(datediff(second,@start_time,@end_time) as nvarchar)+' seconds'
+	print' -------------------------------------------------------------------------------'
+
+	set @start_time=GETDATE();
+	print '>>truncating table Cloud_Warehouse_Compersion_chart';
+	truncate table bronze.Cloud_Warehouse_Compersion_chart;
+	print '>>inserting data into table Cloud_Warehouse_Compersion_chart';
+	bulk insert bronze.Cloud_Warehouse_Compersion_chart
+	from 'C:\Users\DELL\Desktop\לימודים\Project- E-Commerce\CSV files\Cloud Warehouse Compersion Chart.csv'
+	with(
+	firstrow=2,
+	fieldterminator=',',
+	tablock
+	);
+	set @end_time=GETDATE();
+	print 'loading duration: '+ cast(datediff(second,@start_time,@end_time) as nvarchar)+' seconds'
+	print' -------------------------------------------------------------------------------'
+
+	set @start_time=GETDATE();
+	print '>>truncating table Expense_IIGF';
+	truncate table bronze.Expense_IIGF;
+	print '>>inserting data into table Expense_IIGF';
+	bulk insert bronze.Expense_IIGF
+	from 'C:\Users\DELL\Desktop\לימודים\Project- E-Commerce\CSV files\Expense IIGF.csv'
+	with(
+	firstrow=2,
+	fieldterminator=',',
+	tablock
+	);
+	set @end_time=GETDATE();
+	print 'loading duration: '+ cast(datediff(second,@start_time,@end_time) as nvarchar)+' seconds'
+	print' -------------------------------------------------------------------------------'
+
+
+	set @start_time=GETDATE();
+	print '>>truncating table International_sale_Report';
+	truncate table bronze.International_sale_Report;
+	print '>>inserting data into table International_sale_Report';
+	bulk insert bronze.International_sale_Report
+	from 'C:\Users\DELL\Desktop\לימודים\Project- E-Commerce\CSV files\International sale Report.csv'
+	with(
+	firstrow=2,
+	fieldterminator=',',
+	tablock
+	);
+	set @end_time=GETDATE();
+	print 'loading duration: '+ cast(datediff(second,@start_time,@end_time) as nvarchar)+' seconds'
+	print' -------------------------------------------------------------------------------'
+
+	set @start_time=GETDATE();
+	print '>>truncating table May_2022';
+	truncate table bronze.May_2022;
+	print '>>inserting data into table May_2022';
+	bulk insert bronze.May_2022
+	from 'C:\Users\DELL\Desktop\לימודים\Project- E-Commerce\CSV files\May-2022.csv'
+	with(
+	firstrow=2,
+	fieldterminator=',',
+	tablock
+	);
+		set @end_time=GETDATE();
+	print 'loading duration: '+ cast(datediff(second,@start_time,@end_time) as nvarchar)+' seconds'
+	print' -------------------------------------------------------------------------------'
+
+	set @start_time=GETDATE();
+	print '>>truncating table P_L_March_2021';
+	truncate table bronze.P_L_March_2021;
+	print '>>inserting data into table P_L_March_2021';
+	bulk insert bronze.P_L_March_2021
+	from 'C:\Users\DELL\Desktop\לימודים\Project- E-Commerce\CSV files\P  L March 2021.csv'
+	with(
+	firstrow=2,
+	fieldterminator=',',
+	tablock
+	);
+		set @end_time=GETDATE();
+	print 'loading duration: '+ cast(datediff(second,@start_time,@end_time) as nvarchar)+' seconds'
+	print' -------------------------------------------------------------------------------'
+
+		set @start_time=GETDATE();
+	print '>>truncating table Sale_Report';
+	truncate table bronze.Sale_Report;
+	print '>>inserting data into table Sale_Report';
+	bulk insert bronze.Sale_Report
+	from 'C:\Users\DELL\Desktop\לימודים\Project- E-Commerce\CSV files\Sale Report.csv'
+	with(
+	firstrow=2,
+	fieldterminator=',',
+	tablock
+	);
+		set @end_time=GETDATE();
+	print 'loading duration: '+ cast(datediff(second,@start_time,@end_time) as nvarchar)+' seconds'
+	print' -------------------------------------------------------------------------------'
+
+	set @batch_end_time=GETDATE();
+	print' ====================================='
+	print 'batch loading duration: '+ cast(datediff(second,@batch_start_time,@batch_end_time) as nvarchar)+' seconds'
+	print' ====================================='
+	end try
+	begin catch
+	print '=========================='
+	print 'error occured during bronze layer loading'
+	print '=========================='
+	print 'error message:'+ error_message();
+	print 'error num:'+ error_number();
+	print 'error severity:'+ error_severity();
+	end catch
+end
