@@ -1,1 +1,3 @@
-
+The following raw CSV files were loaded into the bronze schema using SQL Server Management Studio's Import Wizard.
+Each file was mapped to its corresponding table with matching column structure and data types. Data was validated for structure and encoding prior to import.
+Duplicate and type-related issues were handled either by modifying schema constraints (e.g., dropping primary keys) or adjusting data types (e.g., replacing SMALLINT with INT for zip codes).
