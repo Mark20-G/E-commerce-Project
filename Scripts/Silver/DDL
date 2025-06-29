@@ -7,8 +7,8 @@ and drops tables with same name if exists
 ===========================================
 */
 if OBJECT_ID('silver.customers_dataset', 'u') is not null
-	drop table silver.crm_cust_info;
-create table silver.crm_cust_info(
+	drop table customers_dataset;
+create table silver.customers_dataset(
 customer_id nvarchar(50),
 customer_unique_id nvarchar(50),
 customer_zip_code_prefix int,
