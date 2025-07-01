@@ -45,3 +45,40 @@ create table gold.product(
 	width int,
 	avg_price float
 );
+if OBJECT_ID('gold.customer', 'u') is not null
+	drop table gold.customer;
+create table gold.customer(
+customer_key int,
+zip_code int,
+customer_city nvarchar(50),
+customer_state nvarchar(50)
+);
+if OBJECT_ID('gold.seller', 'u') is not null
+	drop table gold.seller;
+create table gold.seller(
+seller_key int,
+zip_code int,
+seller_city nvarchar(50),
+seller_state nvarchar(50)
+);
+
+if OBJECT_ID('gold.location', 'u') is not null
+	drop table gold.location;
+create table gold.location(
+zip_code int,
+latitude float,
+longitude float,
+city nvarchar(50),
+state nvarchar(50),
+is_valid_location nvarchar(50)
+);
+
+if OBJECT_ID('gold.transactions', 'u') is not null
+	drop table gold.transactions;
+create table gold.transactions(
+order_key int,
+payment_sequential int,
+payment_type nvarchar(50),
+payment_installments int,
+payment_value float
+);
