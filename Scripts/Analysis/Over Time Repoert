@@ -1,0 +1,80 @@
+/*
+===========================================
+Over-time Report
+===========================================
+purpose:
+- This report consolidates key metrics of business performence over time
+
+-------------------------------------------
+•	What are the sales and orders trends over time?
+•	Is there seasonality in sales during the year?
+•	What is the lateness percent in orders over time?
+
+*/
+create view gold.over_time_report as
+----------------------------------
+--calculating sales and orders over time
+----------------------------------
+with trends as(
+SELECT 
+year(approval_date) AS order_year,
+month(approval_date) AS order_month,
+COUNT(DISTINCT order_key) AS orders,
+round(SUM(total),0) AS sales
+FROM gold.orders
+where approval_date is not null
+group by year(approval_date),month(approval_date)
+)
+----------------------------------
+--calculating total sales for each month all over the years
+----------------------------------
+,seasonality as(
+SELECT 
+month(approval_date) AS order_month,
+round(SUM(total),0) AS all_time_month_sales
+FROM gold.orders
+where approval_date is not null
+group by month(approval_date)
+)
+------------------------------------
+--indicating each lateness of order if late
+------------------------------------
+,lateness_per_order as(
+select
+order_key,
+year(approval_date) AS order_year,
+month(approval_date) AS order_month,
+max(case 
+when arrival_date>estimated_arrival_date then 1
+else 0
+end) as times_late
+from gold.orders
+where approval_date is not null
+group by order_key, year(approval_date) , month(approval_date) 
+)
+-------------------------------------------
+--counting total latenesses for each month and calculating the lateness percent
+-------------------------------------------
+,lateness_total as(
+select
+order_year,
+order_month,
+sum(times_late) as times_late,
+count(distinct order_key) as month_orders,
+sum(times_late)*1.0/count(distinct order_key) as lateness_percent
+from lateness_per_order
+group by order_year,order_month)
+-----------------------------------------------
+--combining all the queries into one
+------------------------------------------------
+select
+t.order_year,
+t.order_month,
+t.orders,
+t.sales,
+s.all_time_month_sales,
+l.times_late,
+l.lateness_percent
+from trends t
+left join seasonality s on s.order_month=t.order_month
+left join lateness_total l on l.order_year=t.order_year and l.order_month=t.order_month
