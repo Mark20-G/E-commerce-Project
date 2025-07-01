@@ -172,7 +172,7 @@ seller_key,
 seller_zip_code_prefix as zip_code,
 seller_city,
 seller_state
-from silver.seller_dataset
+from silver.sellers_dataset
 	set @end_time=GETDATE();
 	print 'loading duration: '+ cast(datediff(second,@start_time,@end_time) as nvarchar)+' seconds'
 	print' -------------------------------------------------------------------------------'
