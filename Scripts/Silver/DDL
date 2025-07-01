@@ -9,8 +9,9 @@ and drops tables with same name if exists
 if OBJECT_ID('silver.customers_dataset', 'u') is not null
 	drop table silver.customers_dataset;
 create table silver.customers_dataset(
+customer_key int,
 customer_id nvarchar(50),
-customer_key nvarchar(50),
+customer_unique_id nvarchar(50),
 customer_zip_code_prefix int,
 customer_city nvarchar(50),
 customer_state nvarchar(50),
@@ -70,6 +71,7 @@ dwh_create_date datetime2 default getdate()
 if OBJECT_ID('silver.orders_dataset', 'u') is not null
 	drop table silver.orders_dataset;
 create table silver.orders_dataset(
+order_key int,
 order_id nvarchar(50),
 customer_id nvarchar(50),
 order_status nvarchar(50),
@@ -92,6 +94,7 @@ dwh_create_date datetime2 default getdate()
 if OBJECT_ID('silver.products_dataset', 'u') is not null
 	drop table silver.products_dataset;
 create table silver.products_dataset(
+product_key int,
 product_id nvarchar(50),
 product_category_name nvarchar(50),
 product_name_lenght int,
@@ -107,6 +110,7 @@ dwh_create_date datetime2 default getdate()
 if OBJECT_ID('silver.sellers_dataset', 'u') is not null
 	drop table silver.sellers_dataset;
 create table silver.sellers_dataset(
+seller_key int,
 seller_id nvarchar(50),
 seller_zip_code_prefix int,
 seller_city nvarchar(50),
