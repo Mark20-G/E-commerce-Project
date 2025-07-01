@@ -231,7 +231,7 @@ set @end_time=GETDATE();
 	end try
 	begin catch
 	print '=========================='
-	print 'error occured during bronze layer loading'
+	print 'error occured during gold layer loading'
 	print '=========================='
 	print 'error message:'+ error_message();
 	print 'error num:'+ error_number();
