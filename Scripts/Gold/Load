@@ -90,12 +90,11 @@ left join silver.products_dataset p on p.product_id=b.product_id
 	print 'loading duration: '+ cast(datediff(second,@start_time,@end_time) as nvarchar)+' seconds'
 	print' -------------------------------------------------------------------------------'
 
-	set @batch_start_time=GETDATE();
 	set @start_time=GETDATE();
 	print '>>truncating table product';
 	truncate table gold.product;
 	print '>>inserting data into table product';
-	insert into gold.orders(
+	insert into gold.product(
 	 product_key,
     product_category,
 	product_name_length,
@@ -138,4 +137,105 @@ group by p.product_key,
 	print 'loading duration: '+ cast(datediff(second,@start_time,@end_time) as nvarchar)+' seconds'
 	print' -------------------------------------------------------------------------------'
 
+	set @start_time=GETDATE();
+	print '>>truncating table customer';
+	truncate table gold.customer;
+	print '>>inserting data into table customer';
+	insert into gold.customer(
+	customer_key,
+	zip_code,
+	customer_city,
+	customer_state
+	)
+select
+customer_key,
+customer_zip_code_prefix as zip_code,
+customer_city,
+customer_state
+from silver.customers_dataset
+	set @end_time=GETDATE();
+	print 'loading duration: '+ cast(datediff(second,@start_time,@end_time) as nvarchar)+' seconds'
+	print' -------------------------------------------------------------------------------'
+
+	set @start_time=GETDATE();
+	print '>>truncating table seller';
+	truncate table gold.seller;
+	print '>>inserting data into table seller';
+	insert into gold.seller(
+	seller_key,
+	zip_code,
+	seller_city,
+	seller_state
+	)
+select
+seller_key,
+seller_zip_code_prefix as zip_code,
+seller_city,
+seller_state
+from silver.seller_dataset
+	set @end_time=GETDATE();
+	print 'loading duration: '+ cast(datediff(second,@start_time,@end_time) as nvarchar)+' seconds'
+	print' -------------------------------------------------------------------------------'
+
+	set @start_time=GETDATE();
+	print '>>truncating table location';
+	truncate table gold.location;
+	print '>>inserting data into table location';
+	insert into gold.location(
+	zip_code,
+	latitude,
+	longitude,
+	city,
+	state,
+	is_valid_location
+	)
+select
+geolocation_zip_code_prefix as zip_code,
+geolocation_lat as latitude,
+geolocation_lng as longitude,
+geolocation_city as city,
+geolocation_state as state,
+is_valid_location
+from silver.geolocation_dataset
+	set @end_time=GETDATE();
+	print 'loading duration: '+ cast(datediff(second,@start_time,@end_time) as nvarchar)+' seconds'
+	print' -------------------------------------------------------------------------------'
+
+	set @start_time=GETDATE();
+	print '>>truncating table transactions';
+	truncate table gold.transactions;
+	print '>>inserting data into table transactions';
+	insert into gold.transactions(
+	order_key,
+	payment_sequential,
+	payment_type,
+	payment_installments,
+	payment_value
+	)
+	select
+o.order_key,
+op.payment_sequential,
+op.payment_type,
+op.payment_installments,
+op.payment_value
+from silver.order_payments_dataset op
+left join silver.orders_dataset o on o.order_id=op.order_id
+set @end_time=GETDATE();
+	print 'loading duration: '+ cast(datediff(second,@start_time,@end_time) as nvarchar)+' seconds'
+	print' -------------------------------------------------------------------------------'
+
+	set @batch_end_time=GETDATE();
+	print' ====================================='
+	print 'batch loading duration: '+ cast(datediff(second,@batch_start_time,@batch_end_time) as nvarchar)+' seconds'
+	print' ====================================='
+	end try
+	begin catch
+	print '=========================='
+	print 'error occured during bronze layer loading'
+	print '=========================='
+	print 'error message:'+ error_message();
+	print 'error num:'+ error_number();
+	print 'error severity:'+ error_severity();
+	end catch
+end
 
