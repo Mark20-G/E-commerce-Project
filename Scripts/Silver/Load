@@ -25,7 +25,7 @@ begin
 	customer_unique_id,
 	customer_zip_code_prefix,
 	customer_city,
-	customer_state	
+	customer_state
 	)
 select
 ROW_NUMBER() over(order by customer_id) as customer_key,
@@ -33,9 +33,37 @@ trim(lower(customer_id)) as customer_id, --Text Standardization
 trim(lower(customer_unique_id)) as customer_unique_id,
 customer_zip_code_prefix,
 trim(lower(customer_city)) as customer_city,
-trim(upper(customer_state)) as customer_state
+CASE customer_state
+    WHEN 'AC' THEN 'Acre'
+    WHEN 'AL' THEN 'Alagoas'
+    WHEN 'AM' THEN 'Amazonas'
+    WHEN 'AP' THEN 'Amapá'
+    WHEN 'BA' THEN 'Bahia'
+    WHEN 'CE' THEN 'Ceará'
+    WHEN 'DF' THEN 'Distrito Federal'
+    WHEN 'ES' THEN 'Espírito Santo'
+    WHEN 'GO' THEN 'Goiás'
+    WHEN 'MA' THEN 'Maranhão'
+    WHEN 'MG' THEN 'Minas Gerais'
+    WHEN 'MS' THEN 'Mato Grosso do Sul'
+    WHEN 'MT' THEN 'Mato Grosso'
+    WHEN 'PA' THEN 'Pará'
+    WHEN 'PB' THEN 'Paraíba'
+    WHEN 'PE' THEN 'Pernambuco'
+    WHEN 'PI' THEN 'Piauí'
+    WHEN 'PR' THEN 'Paraná'
+    WHEN 'RJ' THEN 'Rio de Janeiro'
+    WHEN 'RN' THEN 'Rio Grande do Norte'
+    WHEN 'RO' THEN 'Rondônia'
+    WHEN 'RR' THEN 'Roraima'
+    WHEN 'RS' THEN 'Rio Grande do Sul'
+    WHEN 'SC' THEN 'Santa Catarina'
+    WHEN 'SE' THEN 'Sergipe'
+    WHEN 'SP' THEN 'São Paulo'
+    WHEN 'TO' THEN 'Tocantins'
+    ELSE 'Unknown'
+  END AS customer_state 
 from bronze.customers_dataset
-where row_num=1--to remove duplicates of customers with the same unique_id
 	set @end_time=GETDATE();
 	print 'loading duration: '+ cast(datediff(second,@start_time,@end_time) as nvarchar)+' seconds'
 	print' -------------------------------------------------------------------------------'
@@ -63,7 +91,36 @@ geolocation_zip_code_prefix,
 geolocation_lat,
 geolocation_lng,
 trim(lower(geolocation_city)) as geolocation_city,--Text Standardization
-trim(upper(geolocation_state)) as geolocation_state,
+	CASE geolocation_state
+    WHEN 'AC' THEN 'Acre'
+    WHEN 'AL' THEN 'Alagoas'
+    WHEN 'AM' THEN 'Amazonas'
+    WHEN 'AP' THEN 'Amapá'
+    WHEN 'BA' THEN 'Bahia'
+    WHEN 'CE' THEN 'Ceará'
+    WHEN 'DF' THEN 'Distrito Federal'
+    WHEN 'ES' THEN 'Espírito Santo'
+    WHEN 'GO' THEN 'Goiás'
+    WHEN 'MA' THEN 'Maranhão'
+    WHEN 'MG' THEN 'Minas Gerais'
+    WHEN 'MS' THEN 'Mato Grosso do Sul'
+    WHEN 'MT' THEN 'Mato Grosso'
+    WHEN 'PA' THEN 'Pará'
+    WHEN 'PB' THEN 'Paraíba'
+    WHEN 'PE' THEN 'Pernambuco'
+    WHEN 'PI' THEN 'Piauí'
+    WHEN 'PR' THEN 'Paraná'
+    WHEN 'RJ' THEN 'Rio de Janeiro'
+    WHEN 'RN' THEN 'Rio Grande do Norte'
+    WHEN 'RO' THEN 'Rondônia'
+    WHEN 'RR' THEN 'Roraima'
+    WHEN 'RS' THEN 'Rio Grande do Sul'
+    WHEN 'SC' THEN 'Santa Catarina'
+    WHEN 'SE' THEN 'Sergipe'
+    WHEN 'SP' THEN 'São Paulo'
+    WHEN 'TO' THEN 'Tocantins'
+    ELSE 'Unknown'
+  END AS geolocation_state,
 case
 when geolocation_lat is null or geolocation_lng is null then ' not valid'
 else 'valid'
@@ -269,7 +326,36 @@ ROW_NUMBER() over (order by seller_id) as seller_key,
 trim(lower(seller_id)) as seller_id,--text Standardization
 seller_zip_code_prefix,
 trim(lower(seller_city)) as seller_city,
-trim(lower(seller_state)) as seller_state
+CASE seller_state
+    WHEN 'AC' THEN 'Acre'
+    WHEN 'AL' THEN 'Alagoas'
+    WHEN 'AM' THEN 'Amazonas'
+    WHEN 'AP' THEN 'Amapá'
+    WHEN 'BA' THEN 'Bahia'
+    WHEN 'CE' THEN 'Ceará'
+    WHEN 'DF' THEN 'Distrito Federal'
+    WHEN 'ES' THEN 'Espírito Santo'
+    WHEN 'GO' THEN 'Goiás'
+    WHEN 'MA' THEN 'Maranhão'
+    WHEN 'MG' THEN 'Minas Gerais'
+    WHEN 'MS' THEN 'Mato Grosso do Sul'
+    WHEN 'MT' THEN 'Mato Grosso'
+    WHEN 'PA' THEN 'Pará'
+    WHEN 'PB' THEN 'Paraíba'
+    WHEN 'PE' THEN 'Pernambuco'
+    WHEN 'PI' THEN 'Piauí'
+    WHEN 'PR' THEN 'Paraná'
+    WHEN 'RJ' THEN 'Rio de Janeiro'
+    WHEN 'RN' THEN 'Rio Grande do Norte'
+    WHEN 'RO' THEN 'Rondônia'
+    WHEN 'RR' THEN 'Roraima'
+    WHEN 'RS' THEN 'Rio Grande do Sul'
+    WHEN 'SC' THEN 'Santa Catarina'
+    WHEN 'SE' THEN 'Sergipe'
+    WHEN 'SP' THEN 'São Paulo'
+    WHEN 'TO' THEN 'Tocantins'
+    ELSE 'Unknown'
+  END AS seller_state
  FROM bronze.sellers_dataset 
 
 
