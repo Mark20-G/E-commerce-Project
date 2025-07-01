@@ -1,0 +1,32 @@
+/*
+===========================================
+DDL script-gold tables
+===========================================
+script purpose: create tables in 'gold' schema
+and drops tables with same name if exists
+--------------------------------------
+tables are ready for usage
+===========================================
+*/
+if OBJECT_ID('gold.orders', 'u') is not null
+	drop table gold.orders;
+create table gold.orders(
+order_key int,
+customer_key int,
+seller_key int,
+product_key int,
+item_amount int,
+price float,
+total float,
+freight float,
+order_status nvarchar(50),
+purchase_date datetime2,
+approval_date datetime2,
+shipping_date datetime2,
+arrival_date datetime2,
+estimated_arrival_date date,
+shipping_limit_date date,
+review_score int ,
+review_create_date date,
+review_complete_date datetime2
+);
