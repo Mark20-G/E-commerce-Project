@@ -18,12 +18,7 @@ begin
 	print '>>truncating table customers_dataset';
 	truncate table silver.customers_dataset;
 	print '>>inserting data into table customers_dataset';
-	;with base as(
-select
-*,
-ROW_NUMBER() over (partition by customer_unique_id order by customer_unique_id) as row_num 
-from bronze.customers_dataset
-)
+	
 	insert into silver.customers_dataset(
 	customer_key,
 	customer_id,
@@ -39,7 +34,7 @@ trim(lower(customer_unique_id)) as customer_unique_id,
 customer_zip_code_prefix,
 trim(lower(customer_city)) as customer_city,
 trim(upper(customer_state)) as customer_state
-from base
+from bronze.customers_dataset
 where row_num=1--to remove duplicates of customers with the same unique_id
 	set @end_time=GETDATE();
 	print 'loading duration: '+ cast(datediff(second,@start_time,@end_time) as nvarchar)+' seconds'
