@@ -90,5 +90,52 @@ left join silver.products_dataset p on p.product_id=b.product_id
 	print 'loading duration: '+ cast(datediff(second,@start_time,@end_time) as nvarchar)+' seconds'
 	print' -------------------------------------------------------------------------------'
 
+	set @batch_start_time=GETDATE();
+	set @start_time=GETDATE();
+	print '>>truncating table product';
+	truncate table gold.product;
+	print '>>inserting data into table product';
+	insert into gold.orders(
+	 product_key,
+    product_category,
+	product_name_length,
+	product_description_length,
+	product_photos_amount,
+	weight,
+	length,
+	height,
+	width,
+	avg_price
+	)
+	SELECT
+    p.product_key,
+    case
+	when ISNULL(pc.product_category_name_english, p.product_category_name) is null then 'N/A'
+	else ISNULL(pc.product_category_name_english, p.product_category_name)
+	end AS product_category,
+	p.product_name_lenght as product_name_length,
+	p.product_description_lenght as product_description_length,
+	p.product_photos_qty as product_photos_amount,
+	p.product_weight_g as weight,
+	p.product_length_cm as length,
+	p.product_height_cm as height,
+	p.product_width_cm as width,
+	round(avg(oi.price),2) as avg_price
+FROM silver.products_dataset p
+LEFT JOIN silver.product_category_name_translation pc ON p.product_category_name = pc.product_category_name
+left join silver.order_items_dataset oi on oi.product_id=p.product_id
+group by p.product_key,
+	pc.product_category_name_english,
+    p.product_category_name,
+    p.product_name_lenght,
+    p.product_description_lenght,
+    p.product_photos_qty,
+    p.product_weight_g,
+    p.product_length_cm,
+    p.product_height_cm,
+    p.product_width_cm;
+	set @end_time=GETDATE();
+	print 'loading duration: '+ cast(datediff(second,@start_time,@end_time) as nvarchar)+' seconds'
+	print' -------------------------------------------------------------------------------'
 
 
