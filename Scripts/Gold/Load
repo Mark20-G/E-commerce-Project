@@ -1,0 +1,94 @@
+/*
+========================================================
+stored procedure- load gold layer
+========================================================
+script purpose: loading data into the 'gold' schema from 'silver' layer tables, merging tables, normalizing names and aggregating
+========================================================
+*/
+create or alter procedure gold.load_gold as
+begin
+	declare @start_time datetime, @end_time datetime, @batch_start_time datetime, @batch_end_time datetime;
+ begin try
+	print '====================================================================';
+	print 'loading gold layer';
+	print '====================================================================';
+
+
+	set @batch_start_time=GETDATE();
+	set @start_time=GETDATE();
+	print '>>truncating table orders';
+	truncate table gold.orders;
+	print '>>inserting data into table orders';
+	;with base as(
+	select
+	o.order_key,
+	o.customer_id,
+	oi.seller_id,
+	oi.product_id,
+	oi.item_amount,
+	oi.price,
+	oi.item_amount*oi.price as total,
+	oi.freight,
+	o.order_status,
+	o.order_purchase_timestamp as purchase_date,
+	o.order_approved_at as approval_date,
+	o.order_delivered_carrier_date as shipping_date,
+	o.order_delivered_customer_date as arrival_date,
+	o.order_estimated_delivery_date as estimated_arrival_date,
+	cast(oi.shipping_limit_date as date) as shipping_limit_date,
+	ord.review_score,
+	ord.review_create_date,
+	ord.review_complete_time as review_complete_date
+	from silver.orders_dataset o 
+	left join silver.order_reviews_dataset ord on ord.order_id=o.order_id
+	left join silver.order_items_dataset oi on oi.order_id=o.order_id
+)
+	insert into gold.orders(
+	order_key,
+	customer_key,
+	seller_key,
+	product_key,
+	item_amount,
+	price,
+	total,
+	freight,
+	order_status,
+	purchase_date,
+	approval_date,
+	shipping_date,
+	arrival_date,
+	estimated_arrival_date,
+	shipping_limit_date,
+	review_score,
+	review_create_date,
+	review_complete_date 
+)
+select
+b.order_key,
+c.customer_key,
+s.seller_key,
+p.product_key,
+b.item_amount,
+b.price,
+b.total,
+b.freight,
+b.order_status,
+b.purchase_date,
+b.approval_date,
+b.shipping_date,
+b.arrival_date,
+b.estimated_arrival_date,
+b.shipping_limit_date,
+b.review_score,
+b.review_create_date,
+b.review_complete_date
+from base b
+left join silver.customers_dataset c on c.customer_id=b.customer_id
+left join silver.sellers_dataset s on s.seller_id=b.seller_id
+left join silver.products_dataset p on p.product_id=b.product_id
+	set @end_time=GETDATE();
+	print 'loading duration: '+ cast(datediff(second,@start_time,@end_time) as nvarchar)+' seconds'
+	print' -------------------------------------------------------------------------------'
+
+
+
