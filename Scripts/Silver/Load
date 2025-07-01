@@ -25,15 +25,17 @@ ROW_NUMBER() over (partition by customer_unique_id order by customer_unique_id) 
 from bronze.customers_dataset
 )
 	insert into silver.customers_dataset(
-	customer_id,
 	customer_key,
+	customer_id,
+	customer_unique_id,
 	customer_zip_code_prefix,
 	customer_city,
 	customer_state	
 	)
 select
+ROW_NUMBER() over(order by customer_id) as customer_key,
 trim(lower(customer_id)) as customer_id, --Text Standardization
-trim(lower(customer_unique_id)) as customer_key,
+trim(lower(customer_unique_id)) as customer_unique_id,
 customer_zip_code_prefix,
 trim(lower(customer_city)) as customer_city,
 trim(upper(customer_state)) as customer_state
@@ -179,6 +181,7 @@ from bronze.order_reviews_dataset
 	truncate table silver.orders_dataset;
 	print '>>inserting data into table orders_dataset';
 	insert into silver.orders_dataset(
+	order_key,
 	order_id ,
 	customer_id ,
 	order_status ,
@@ -189,6 +192,7 @@ from bronze.order_reviews_dataset
 	order_estimated_delivery_date 
 	)
 	select
+	ROW_NUMBER() over(order by order_id) as order_key,
 trim(lower(order_id)) as order_id,--text Standardization
 trim(lower(customer_id)) as customer_id,
 trim(lower(order_status)) as order_status,
@@ -224,6 +228,7 @@ trim(lower(column2)) as product_category_name_english
 	truncate table silver.products_dataset;
 	print '>>inserting data into table products_dataset';
 	insert into silver.products_dataset(
+	product_key,
 	product_id ,
 	product_category_name ,
 	product_name_lenght,
@@ -235,6 +240,7 @@ trim(lower(column2)) as product_category_name_english
 	product_width_cm 
 	)
 SELECT 
+ROW_NUMBER () over (order by product_id) as product_key,
 trim(lower(product_id)) as product_id,--text Standardization
 trim(lower(product_category_name)) as product_category_name,
 product_name_lenght,
@@ -257,12 +263,14 @@ product_width_cm
 	truncate table silver.sellers_dataset;
 	print '>>inserting data into table sellers_dataset';
 	insert into silver.sellers_dataset(
+	seller_key,
 	seller_id,
 	seller_zip_code_prefix,
 	seller_city,
 	seller_state
 	)
 SELECT 
+ROW_NUMBER() over (order by seller_id) as seller_key,
 trim(lower(seller_id)) as seller_id,--text Standardization
 seller_zip_code_prefix,
 trim(lower(seller_city)) as seller_city,
@@ -288,3 +296,4 @@ trim(lower(seller_state)) as seller_state
 	print 'error severity:'+ error_severity();
 	end catch
 end
+
