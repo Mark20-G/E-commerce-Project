@@ -30,3 +30,18 @@ review_score int ,
 review_create_date date,
 review_complete_date datetime2
 );
+
+if OBJECT_ID('gold.product', 'u') is not null
+	drop table gold.product;
+create table gold.product(
+    product_key int,
+    product_category nvarchar(50),
+	product_name_length int,
+	product_description_length int,
+	product_photos_amount int,
+	weight int,
+	length int,
+	height int,
+	width int,
+	avg_price float
+);
