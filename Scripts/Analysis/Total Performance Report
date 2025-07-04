@@ -1,1 +1,102 @@
+/*
+===========================================
+Total performance Report
+===========================================
+purpose:
+- This report consolidates total key metrics of business performence overall
 
+-------------------------------------------
+•	- Which product categories generate the highest revenue and volume?
+•	- What is the most common payment method?
+•	- Are there correlations between payment types and Revenue?
+•	- What is the distribution of review scores? 
+•	- Are certain categories or sellers generate higher/lower ratings?
+
+*/
+create or alter view gold.Total_performance_report as
+------------------------------------------
+--aggregating metrics by product category- such as total revenue,orders and average review
+------------------------------------------
+with category_performance as(
+select
+p.product_category as product_category,
+round(sum(o.total),0) as revenue,
+count(distinct o.order_key) as orders,
+round(avg(review_score*1.0),2) as avg_review
+from gold.product p
+left join gold.orders o on o.product_key=p.product_key
+group by p.product_category
+)
+------------------------------------------
+--aggregating metrics by payment method- times used, total payment revenue,avg payment type value
+------------------------------------------
+,
+payment_method as(
+select
+payment_type as payment_type,
+count(order_key) as times_used,
+sum(payment_value) as payment_revenue,
+avg(payment_value) as avg_payment_value
+from gold.transactions
+group by payment_type
+)
+------------------------------------------
+--calculating the review distribution- how many times each review type was scored?
+------------------------------------------
+,
+review_distribution as(
+select
+review_score as review_score,
+count(distinct order_key) as times_scored
+from gold.orders
+group by review_score
+)
+----------------------------------------
+--creating same format for all the cte's, and unioning them all into one main table
+----------------------------------------
+select
+*
+from (
+select 
+product_category,
+revenue,
+orders,
+avg_review,
+null as payment_type,
+null as times_used,
+null as payment_revenue,
+null as avg_payment_value,
+null as review_score,
+null as times_scored
+from category_performance
+
+union all
+
+select 
+null as product_category,
+null as revenue,
+null as orders,
+null as avg_review,
+payment_type,
+times_used,
+payment_revenue,
+avg_payment_value,
+null as review_score,
+null as times_scored
+from payment_method
+
+union all
+
+select 
+    null as product_category,
+    null as revenue,
+    null as orders,
+    null as avg_review,
+    null as payment_type,
+    null as times_used,
+    null as payment_revenue,
+    null as avg_payment_value,
+    review_score,
+    times_scored
+from review_distribution
+) as main
