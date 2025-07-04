@@ -11,70 +11,86 @@ purpose:
 •	What is the lateness percent in orders over time?
 
 */
-create view gold.over_time_report as
+create or alter view gold.over_time_report as
 ----------------------------------
 --calculating sales and orders over time
 ----------------------------------
-with trends as(
-SELECT 
-year(approval_date) AS order_year,
-month(approval_date) AS order_month,
-COUNT(DISTINCT order_key) AS orders,
-round(SUM(total),0) AS sales
-FROM gold.orders
-where approval_date is not null
-group by year(approval_date),month(approval_date)
-)
+WITH trends AS (
+    SELECT 
+        YEAR(approval_date) AS order_year,
+        MONTH(approval_date) AS order_month,
+        COUNT(DISTINCT order_key) AS orders,
+        ROUND(SUM(total), 0) AS month_revenue
+    FROM gold.orders
+    WHERE approval_date IS NOT NULL
+    GROUP BY YEAR(approval_date), MONTH(approval_date)
+),
 ----------------------------------
 --calculating total sales for each month all over the years
 ----------------------------------
-,seasonality as(
-SELECT 
-month(approval_date) AS order_month,
-round(SUM(total),0) AS all_time_month_sales
-FROM gold.orders
-where approval_date is not null
-group by month(approval_date)
-)
+seasonality AS (
+    SELECT 
+        MONTH(approval_date) AS order_month,
+        ROUND(SUM(total), 0) AS all_time_month_sales
+    FROM gold.orders
+    WHERE approval_date IS NOT NULL
+    GROUP BY MONTH(approval_date)
+),
 ------------------------------------
 --indicating each lateness of order if late
 ------------------------------------
-,lateness_per_order as(
-select
-order_key,
-year(approval_date) AS order_year,
-month(approval_date) AS order_month,
-max(case 
-when arrival_date>estimated_arrival_date then 1
-else 0
-end) as times_late
-from gold.orders
-where approval_date is not null
-group by order_key, year(approval_date) , month(approval_date) 
-)
+lateness_per_order AS (
+    SELECT
+        order_key,
+        YEAR(approval_date) AS order_year,
+        MONTH(approval_date) AS order_month,
+        MAX(CASE 
+            WHEN arrival_date > estimated_arrival_date THEN 1
+            ELSE 0
+        END) AS times_late
+    FROM gold.orders
+    WHERE approval_date IS NOT NULL
+    GROUP BY order_key, YEAR(approval_date), MONTH(approval_date)
+),
 -------------------------------------------
 --counting total latenesses for each month and calculating the lateness percent
 -------------------------------------------
-,lateness_total as(
-select
-order_year,
-order_month,
-sum(times_late) as times_late,
-count(distinct order_key) as month_orders,
-sum(times_late)*1.0/count(distinct order_key) as lateness_percent
-from lateness_per_order
-group by order_year,order_month)
+lateness_total AS (
+    SELECT
+        order_year,
+        order_month,
+        SUM(times_late) AS times_late,
+        COUNT(DISTINCT order_key) AS month_orders,
+        SUM(times_late) * 1.0 / COUNT(DISTINCT order_key) AS lateness_percent
+    FROM lateness_per_order
+    GROUP BY order_year, order_month
+),
+-------------------------------------------
+--calculating year kpi's such as total revenue and  average review score
+-------------------------------------------
+year_kpi AS (
+    SELECT
+        YEAR(approval_date) AS order_year,
+        SUM(total) AS year_revenue,
+        round(AVG(review_score*1.0),2) AS year_avg_review
+    FROM gold.orders
+    GROUP BY YEAR(approval_date)
+)
+
 -----------------------------------------------
 --combining all the queries into one
 ------------------------------------------------
-select
-t.order_year,
-t.order_month,
-t.orders,
-t.sales,
-s.all_time_month_sales,
-l.times_late,
-l.lateness_percent
-from trends t
-left join seasonality s on s.order_month=t.order_month
-left join lateness_total l on l.order_year=t.order_year and l.order_month=t.order_month
+SELECT
+    t.order_year,
+    t.order_month,
+    t.orders,
+    t.month_revenue,
+    yk.year_revenue,
+    yk.year_avg_review,
+    s.all_time_month_sales,
+    l.times_late,
+    l.lateness_percent
+FROM trends t
+LEFT JOIN seasonality s ON s.order_month = t.order_month
+LEFT JOIN lateness_total l ON l.order_year = t.order_year AND l.order_month = t.order_month
+LEFT JOIN year_kpi yk ON yk.order_year = t.order_year;
