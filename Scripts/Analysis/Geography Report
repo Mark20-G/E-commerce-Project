@@ -1,0 +1,42 @@
+/*
+===========================================
+Geography Report Report
+===========================================
+purpose:
+- This report consolidates key geography and delivery metrics by state distribution.
+
+-------------------------------------------
+•	- What is the average delivery time by state?
+•	- Which shipping states face frequent delays?
+•	- Which states have the highest concentration of customers?
+
+*/
+create or alter view gold.geography_report as
+---------------------------------------------------
+--creating base table with all the needed data to aggregate
+---------------------------------------------------
+with base_state as(
+select
+o.order_key,
+c.customer_state,
+case
+when o.arrival_date>o.estimated_arrival_date then 1
+else 0
+end as is_late,
+o.purchase_date,
+o.arrival_date,
+c.customer_key
+from gold.orders o 
+left join gold.customer c on c.customer_key=o.customer_key
+)
+-----------------------------------------------------
+--aggregating all the key metrics- delays amount, customers concentration, avg_delivery_days for each state
+-----------------------------------------------------
+select
+customer_state,
+sum(is_late) as delays_amount,
+count(distinct customer_key) as customers,
+round(avg(datediff(DAY,purchase_date,arrival_date)*1.0),1) as avg_delivery_days
+from base_state
+group by customer_state
+
