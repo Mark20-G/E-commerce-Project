@@ -3,13 +3,15 @@
 Over-time Report
 ===========================================
 purpose:
-- This report consolidates key metrics of business performence over time
-
+- This report consolidates key metrics of business performence over time such as KPI's, trends and distributions
 -------------------------------------------
 •	What are the sales and orders trends over time?
 •	Is there seasonality in sales during the year?
 •	What is the lateness percent in orders over time?
-
+•	Average review score 
+•	Average Revenue per order
+•	Average delivery time (vs. estimated)
+•	Cancellation rate
 */
 create or alter view gold.over_time_report as
 ----------------------------------
@@ -66,14 +68,33 @@ lateness_total AS (
     GROUP BY order_year, order_month
 ),
 -------------------------------------------
---calculating year kpi's such as total revenue and  average review score
+--calculating year kpi's such as total revenue and  average review score,avg_delivery time vs estimated, cancellation rate
 -------------------------------------------
+base_kpi as(
+ SELECT
+		distinct order_key,
+        approval_date,
+        total,
+        review_score,
+		purchase_date,
+		arrival_date,
+		estimated_arrival_date,
+		case
+		when order_status like 'canceled' then 1
+		else 0
+		end as is_cancelled
+    FROM gold.orders
+)
+,
 year_kpi AS (
     SELECT
         YEAR(approval_date) AS order_year,
         SUM(total) AS year_revenue,
-        round(AVG(review_score*1.0),2) AS year_avg_review
-    FROM gold.orders
+        round(AVG(review_score*1.0),2) AS year_avg_review,
+		round(avg(datediff(DAY,purchase_date,arrival_date)*1.0),1) as avg_delivery_time,
+		round(avg(datediff(DAY,purchase_date,estimated_arrival_date)*1.0),1) as avg_estimated_delivery_time,
+	    sum(is_cancelled) as cancellation_amount
+    FROM base_kpi
     GROUP BY YEAR(approval_date)
 )
 
@@ -87,6 +108,9 @@ SELECT
     t.month_revenue,
     yk.year_revenue,
     yk.year_avg_review,
+	yk.cancellation_amount as year_canellation_amount,
+	yk.avg_delivery_time as year_avg_delivery_time,
+	yk.avg_estimated_delivery_time as avg_estimated_delivery_time,
     s.all_time_month_sales,
     l.times_late,
     l.lateness_percent
