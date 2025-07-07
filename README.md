@@ -23,8 +23,12 @@ Built an ETL pipeline in SQL:
 
 
 ### ✅ Data Modeling  
-Created a star-schema model aligning facts and dimensions using surrogate keys for clean joins.  
-📷 ![Data flow](https://github.com/user-attachments/assets/4e873278-3a49-4bf7-8cd5-bc29e5cca3cd)
+Created a star-schema model aligning facts and dimensions using surrogate keys for clean joins. 
+
+![Data Model](https://github.com/user-attachments/assets/e78285ea-8a25-4dba-bab5-dc00c1d9cddc)
+
+
+ ![Data flow](https://github.com/user-attachments/assets/4e873278-3a49-4bf7-8cd5-bc29e5cca3cd)
 
 
 ### ✅ Dashboard Design (Power BI)  
