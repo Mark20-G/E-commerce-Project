@@ -68,12 +68,18 @@ Built an executive summary with:
 
 ---
 
-## 👨‍💻 About Me
+**👨‍💻 About Me**
 
-Hi! I'm Mark,  
-A data analyst passionate about turning messy datasets into clear, decision-driving insights.  
-In this project, I applied structured data engineering (ETL), SQL analytics, DAX, and dashboarding to deliver business-ready analysis.
+Hi! I'm Mark,
 
-This project is part of my growing portfolio — feel free to check out my 📊 Tableau Dashboards Project or 🏗 Data Warehouse Build using SQL Server.
+I am currently building a portfolio of real-world data projects, combining SQL, data modeling, and business intelligence.
+
+This is one of several projects in my GitHub portfolio — you can also check out my other projects:
+
+[📊 Data Warehouse](https://github.com/Mark20-G/SQL-DWH-Project)
+
+[📊 Adventure Works](https://github.com/Mark20-G/Adventure-Works-Project)
+
+
 
 More projects coming soon – stay tuned! 🚀
